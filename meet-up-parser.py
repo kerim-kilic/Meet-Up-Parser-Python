@@ -1,16 +1,12 @@
 # Author:   Kerim Kilic
 # date:     04/2022
-from re import L
+
 import pandas as pd
 import numpy as np
 import json
 
-from pprint import pprint
-
-
 f = open("meetup_data.json")
 data = json.load(f)
-
 
 for i in data:
     a = i["input"]
@@ -106,8 +102,6 @@ del(data['location'])
 
 data = data.replace(np.nan, '', regex = True)
 
-print(data)
-
 i = 0
 new_data = []
 while(i < total_data):
@@ -154,9 +148,15 @@ while(i < total_data):
 
     i = i + 1
             
-print(new_data[0])
-print(new_data[1])
-print(new_data[2])
-print(new_data[3])
-print(new_data[4])
-print(new_data[5])
+new_data = pd.DataFrame(new_data)
+new_data.columns = ["meetUps"]
+new_data['meetUps'] = new_data['meetUps'].astype("string")
+dict_data = new_data.to_dict("dict")
+list_data = list(dict_data["meetUps"].values())
+new_dict = {"meetUps" : list_data}
+
+with open('./json_data.json', 'w') as outfile:
+    json.dump(new_dict, outfile,indent = 2,ensure_ascii=False)
+
+#############
+
