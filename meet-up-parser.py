@@ -112,7 +112,7 @@ while(i < total_data):
         new_data.append(data.values[i,1] + " · " + data.values[i,2])
     # Check if endDate is present
     if(data.values[i,3] == ""):
-        new_data[i] = new_data[i] + " " + data.values[i,3] + " · "
+        new_data[i] = new_data[i] + " " + data.values[i,3] + "· "
     else:
         new_data[i] = new_data[i] + " / " + data.values[i,3] + " · "
     
