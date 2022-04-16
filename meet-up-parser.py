@@ -5,149 +5,70 @@ import pandas as pd
 import numpy as np
 import json
 
-f = open("meetup_data.json")
-data = json.load(f)
-
-for i in data:
-    a = i["input"]
-f.close()
+with open('meetup_data.json') as f:
+    a = json.load(f)
 
 data = pd.DataFrame(a)
 total_data = len(data)
 
+tmp = data["input"].values[0]["location"]
+tmp = tmp[0]
+
 #######################
 
-city_1 = []
-state_1 = []
-country_1 = []
-city_2 = []
-state_2 = []
-country_2 = []
-j = 0
-while(j < total_data):
-    if(np.size(data["location"].values[j]) == 1):
-        # Do something else
-        tmp = data["location"].values[j]
-        tmp = tmp[0]
-        if 'city' in tmp:
-            city_1.append(tmp['city'])
-            city_2.append("")
-        else:
-            city_1.append("")
-            city_2.append("")
-        if 'state' in tmp:
-            state_1.append(tmp['state'])
-            state_2.append("")
-        else:
-            state_1.append("")
-            state_2.append("")
-        if 'country' in tmp:
-            country_1.append(tmp['country'])
-            country_2.append("")
-        else:
-            country_1.append("")
-            country_2.append("")
+def arrange_data(temp):
+    tmp = temp
+    if("edition" in tmp):   # Check if edition is present
+        meetup_string = tmp["edition"] + " " + tmp["name"] + " · " + tmp["startDate"]
     else:
-        # Do something else
-        tmp = data["location"].values[j]
-        tmp2 = tmp[0]
-        tmp3 = tmp[1]
-        if 'city' in tmp2:
-            city_1.append(tmp2['city'])
+        meetup_string = tmp["name"] + " · " + tmp["startDate"]
+    if("endDate" in tmp):   # Check if endDate is present
+        meetup_string = meetup_string + " / " + tmp["endDate"] + " · "
+    else:
+        meetup_string = meetup_string + " · "
+    ##
+    if(np.size(tmp["location"]) == 1):
+        if("city" in tmp["location"][0] and "state" in tmp["location"][0]):
+            location_string = tmp["location"][0]["city"] + ", " + tmp["location"][0]["state"] + ". " + tmp["location"][0]["country"]
+        elif("city" in tmp["location"][0] and "state" not in tmp["location"][0]):
+            location_string = tmp["location"][0]["city"] + ", " + tmp["location"][0]["country"]
+        elif("city" not in tmp["location"][0] and "state" in tmp["location"][0]):
+            location_string = tmp["location"][0]["state"] + ", " + tmp["location"][0]["country"]
+    elif(np.size(tmp["location"]) == 2):
+        if(tmp["location"][0]["country"] != tmp["location"][1]["country"]):
+            if("city" in tmp["location"][0] and "state" in tmp["location"][0]):
+                location_string1 = tmp["location"][0]["city"] + ", " + tmp["location"][0]["state"] + ". " + tmp["location"][0]["country"]
+            elif("city" in tmp["location"][0] and "state" not in tmp["location"][0]):
+                location_string1 = tmp["location"][0]["city"] + ", " + tmp["location"][0]["country"]
+            elif("city" not in tmp["location"][0] and "state" in tmp["location"][0]):
+                location_string1 = tmp["location"][0]["state"] + ", " + tmp["location"][0]["country"]
         else:
-            city_1.append("")
-        if 'state' in tmp2:
-            state_1.append(tmp2['state'])
-        else:
-            state_1.append("")   
-        if 'country' in tmp2:
-            country_1.append(tmp2['country'])
-        else:
-            country_1.append("") 
-        
-        if 'city' in tmp3:
-            city_2.append(tmp3['city'])
-        else:
-            city_2.append("")
-        if 'state' in tmp3:
-            state_2.append(tmp3['state'])
-        else:
-            state_2.append("")   
-        if 'country' in tmp3:
-            country_2.append(tmp3['country'])
-        else:
-            country_2.append("") 
+            if("city" in tmp["location"][0] and "state" in tmp["location"][0]):
+                location_string1 = tmp["location"][0]["city"] + ", " + tmp["location"][0]["state"]
+            elif("city" in tmp["location"][0] and "state" not in tmp["location"][0]):
+                location_string1 = tmp["location"][0]["city"]
+            elif("city" not in tmp["location"][0] and "state" in tmp["location"][0]):
+                location_string1 = tmp["location"][0]["state"]
 
-    j = j + 1
+        if("city" in tmp["location"][1] and "state" in tmp["location"][1]):
+            location_string2 = " | " + tmp["location"][1]["city"] + ", " + tmp["location"][1]["state"] + ". " + tmp["location"][1]["country"]
+        elif("city" in tmp["location"][1] and "state" not in tmp["location"][1]):
+            location_string2 = " | " +  tmp["location"][1]["city"] + ", " + tmp["location"][1]["country"]
+        elif("city" not in tmp["location"][1] and "state" in tmp["location"][1]):
+            location_string2 = " | " +  tmp["location"][1]["state"] + ", " + tmp["location"][1]["country"]
+        location_string = location_string1 + location_string2
+    
+    return(meetup_string + location_string)
 
-###
-
-data['edition'] = data['edition'].astype("string")
-data['name'] = data['name'].astype("string")
-data['startDate'] = data['startDate'].astype("string")
-data['endDate'] = data['endDate'].astype("string")
-data['city_1'] = city_1
-data['city_1'] = data['city_1'].astype("string")
-data['state_1'] = state_1
-data['state_1'] = data['state_1'].astype("string")
-data['country_1'] = country_1
-data['country_1'] = data['country_1'].astype("string")
-data['city_2'] = city_2
-data['city_2'] = data['city_2'].astype("string")
-data['state_2'] = state_2
-data['state_2'] = data['state_2'].astype("string")
-data['country_2'] = country_2
-data['country_2'] = data['country_2'].astype("string")
-del(data['location'])
-
-data = data.replace(np.nan, '', regex = True)
+#######################
 
 i = 0
 new_data = []
 while(i < total_data):
-    # Check if edition is present
-    if(data.values[i,0] != ""):
-        new_data.append(data.values[i,0] + " " + data.values[i,1] + " · " + data.values[i,2])
-    else:
-        new_data.append(data.values[i,1] + " · " + data.values[i,2])
-    # Check if endDate is present
-    if(data.values[i,3] == ""):
-        new_data[i] = new_data[i] + " " + data.values[i,3] + "· "
-    else:
-        new_data[i] = new_data[i] + " / " + data.values[i,3] + " · "
-    
-    # Check if city_1 and state_1 are present and if a second location is present
-    if(data.values[i,9] != "" and (data.values[i,9] == data.values[i,6])):
-        if(data.values[i,4] == ""):
-            if(data.values[i,5] != ""):
-                new_data[i] = new_data[i] + data.values[i,5]
-        else:
-            if(data.values[i,5] != ""):
-                new_data[i] = new_data[i] + data.values[i,4] + ", " + data.values[i,5]
-            else:
-                new_data[i] = new_data[i] + data.values[i,4]
-    else:
-        if(data.values[i,4] == ""):
-            if(data.values[i,5] != ""):
-                new_data[i] = new_data[i] + data.values[i,5] + ", " + data.values[i,6]
-        else:
-            if(data.values[i,5] != ""):
-                new_data[i] = new_data[i] + data.values[i,4] + ", " + data.values[i,5] + ". " + data.values[i,6]
-            else:
-                new_data[i] = new_data[i] + data.values[i,4] + ", " + data.values[i,6]
-    
-    # Check if city_2 and state_2 are present
-    if(data.values[i,9] != ""):
-        if(data.values[i,7] != ""):
-            if(data.values[i,8] == ""):
-                new_data[i] = new_data[i] + " | " + data.values[i,7] + ", " + data.values[i,9]
-            else:
-                new_data[i] = new_data[i] + " | " + data.values[i,7] + ", " + data.values[i,8] + ". " + data.values[i,9]
-        else:
-            new_data[i] = new_data[i] + " | " + data.values[i,8] + ", " + data.values[i,9]
-
+    tmp = data["input"].values[i]
+    new_data.append(arrange_data(tmp))
     i = i + 1
-            
+
 new_data = pd.DataFrame(new_data)
 new_data.columns = ["meetUps"]
 new_data['meetUps'] = new_data['meetUps'].astype("string")
@@ -157,6 +78,3 @@ new_dict = {"meetUps" : list_data}
 
 with open('./json_data.json', 'w') as outfile:
     json.dump(new_dict, outfile,indent = 2,ensure_ascii=False)
-
-#############
-
