@@ -40,12 +40,18 @@ def arrange_data(temp):
         elif("city" in tmp["location"][i] and "state" not in tmp["location"][i]):
             location_string = location_string + tmp["location"][i]["city"] + ", " + tmp["location"][i]["country"]
         elif("city" not in tmp["location"][i] and "state" in tmp["location"][i]):
-            location_string = location_string +  tmp["location"][i]["state"] + ", " + tmp["location"][i]["country"]
+            location_string = location_string + tmp["location"][i]["state"] + ", " + tmp["location"][i]["country"]
         # Check if two locations are in the same country
         if(i == 0 and np.size(tmp["location"]) > 1 and tmp["location"][i]["country"] != tmp["location"][i+1]["country"]):
             location_string = location_string + " | "
         elif((i == 0 and np.size(tmp["location"]) > 1 and tmp["location"][i]["country"] == tmp["location"][i+1]["country"])):
-            location_string = location_string.replace(", " + tmp["location"][i]["country"], " | ")
+            # Check if two cities are in the same same state or not
+            if("state" not in tmp["location"][i]):
+                location_string = location_string.replace(", " + tmp["location"][i]["country"], " | ")
+            elif("state" in tmp["location"][i] and (tmp["location"][i]["state"] == tmp["location"][i+1]["state"])):
+                location_string = location_string.replace(", " + tmp["location"][i]["state"] + ". " + tmp["location"][i]["country"], " | ")
+            elif("state" in tmp["location"][i] and (tmp["location"][i]["state"] != tmp["location"][i+1]["state"])):    
+                location_string  = location_string.replace(". " + tmp["location"][i]["country"], " | ")
         i = i + 1
     return(meetup_string + location_string)
 ####################################################################
